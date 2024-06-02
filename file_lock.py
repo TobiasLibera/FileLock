@@ -14,7 +14,7 @@ class FileLock():
         
 
     def __enter__(self, *args, **kwargs):
-        self._acquire()
+        self.acquire()
         return True
 
 
@@ -25,7 +25,7 @@ class FileLock():
         return True  
 
 
-    def aquire(self):
+    def acquire(self):
         self.file = open(self.path, 'w')
         self._acquire()
         self.is_locked = True
