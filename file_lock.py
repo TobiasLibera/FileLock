@@ -14,22 +14,44 @@ class FileLock():
         
 
     def __enter__(self, *args, **kwargs):
-        self.file = open(self.path, 'w')
-        self.acquire()
-        self.is_locked = True
+        self._acquire()
         return True
 
 
     def __exit__(self, exc_type=None, exc_value=None, traceback=None):
-        self.file.flush()
-        os.fsync(self.file.fileno() )
         self.release()
-        self.is_locked = False
-        self.file.close()
-        self.file = None
         if exc_type != None:
             return False
         return True  
+
+
+    def aquire(self):
+        self.file = open(self.path, 'w')
+        self._acquire()
+        self.is_locked = True
+
+
+    def release(self):
+        self.file.flush()
+        os.fsync(self.file.fileno() )
+        self._release()
+        self.is_locked = False
+        self.file.close()
+        self.file = None
+
+
+    def _acquire(self):
+        if self.file.writable():
+            fcntl.lockf(self.file, fcntl.LOCK_EX)
+
+
+    def _release(self):
+        if self.file.writable():
+            fcntl.lockf(self.file, fcntl.LOCK_UN)
+
+
+    def is_locked(self):
+        return self.is_locked 
 
 
     def acquire(self):
